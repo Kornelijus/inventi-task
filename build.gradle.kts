@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "2.5.6"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
-    kotlin("jvm") version "1.5.31"
-    kotlin("plugin.spring") version "1.5.31"
-    kotlin("plugin.jpa") version "1.5.31"
-    kotlin("plugin.allopen") version "1.5.31" // Needed for JPA https://youtrack.jetbrains.com/issue/KT-28525
+    kotlin("jvm") version "1.6.0"
+    kotlin("plugin.spring") version "1.6.0"
+    kotlin("plugin.jpa") version "1.6.0"
+    kotlin("plugin.allopen") version "1.6.0" // Needed for JPA https://youtrack.jetbrains.com/issue/KT-28525
 }
 
 // Has to be specified manually for now https://youtrack.jetbrains.com/issue/KT-28594
