@@ -9,7 +9,7 @@ plugins {
     kotlin("plugin.allopen") version "1.5.31" // Needed for JPA https://youtrack.jetbrains.com/issue/KT-28525
 }
 
-// https://youtrack.jetbrains.com/issue/KT-28594
+// Has to be specified manually for now https://youtrack.jetbrains.com/issue/KT-28594
 allOpen {
     annotation("javax.persistence.Entity")
 }
@@ -29,6 +29,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.opencsv:opencsv:5.5.2")
+    implementation("org.springdoc:springdoc-openapi-ui:1.5.12")
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.5.12")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
