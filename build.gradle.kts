@@ -5,6 +5,13 @@ plugins {
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.spring") version "1.5.31"
+    kotlin("plugin.jpa") version "1.5.31"
+    kotlin("plugin.allopen") version "1.5.31" // Needed for JPA https://youtrack.jetbrains.com/issue/KT-28525
+}
+
+// https://youtrack.jetbrains.com/issue/KT-28594
+allOpen {
+    annotation("javax.persistence.Entity")
 }
 
 group = "com.tvaria"
@@ -17,10 +24,14 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.opencsv:opencsv:5.5.2")
+    runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 }
 
 tasks.withType<KotlinCompile> {
