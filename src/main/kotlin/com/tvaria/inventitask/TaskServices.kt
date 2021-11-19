@@ -15,7 +15,7 @@ interface AccountService {
         accountNumber: String,
         fromDate: String?,
         toDate: String?
-    ): List<HashMap<Currency, BigDecimal>>
+    ): HashMap<Currency, BigDecimal>
 }
 
 interface StatementService {
@@ -30,7 +30,7 @@ class AccountServiceImpl(@Autowired val accountRepository: AccountRepository) : 
         accountNumber: String,
         fromDate: String?,
         toDate: String?
-    ): List<HashMap<Currency, BigDecimal>> {
+    ): HashMap<Currency, BigDecimal> {
         TODO("Calculate Account Balance")
     }
 }
