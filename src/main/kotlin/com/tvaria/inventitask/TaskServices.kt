@@ -25,7 +25,10 @@ interface StatementService {
 }
 
 @Service
-class AccountServiceImpl(@Autowired val accountRepository: AccountRepository) : AccountService {
+class AccountServiceImpl(
+    @Autowired val accountRepository: AccountRepository,
+    @Autowired val transactionRepository: TransactionRepository
+) : AccountService {
     override fun getAccountBalance(
         accountNumber: String,
         fromDate: String?,
@@ -66,6 +69,11 @@ class StatementServiceImpl(@Autowired val transactionRepository: TransactionRepo
         val transactions = mutableListOf<BankTransaction>()
         csvReader().open(csv) {
             readAllWithHeaderAsSequence().forEach { row: Map<String, String> ->
+                // Check for non-negative amount
+                if (BigDecimal(row["amount"]!!).compareTo(BigDecimal.ZERO) == -1) {
+                    throw IllegalArgumentException("Amount cannot be negative")
+                }
+
                 transactions.add(
                     BankTransaction(
                         row["account"]!!,
