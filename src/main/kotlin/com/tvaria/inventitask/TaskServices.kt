@@ -20,7 +20,7 @@ interface AccountService {
 
 interface StatementService {
     fun getStatement(accountNumber: String?, from: String?, to: String?): List<BankTransaction>
-    fun importStatement(csvFile: InputStream)
+    fun importStatement(csv: InputStream)
     fun exportStatement(response: HttpServletResponse, from: String?, to: String?)
 }
 
