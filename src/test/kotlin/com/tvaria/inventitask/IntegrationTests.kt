@@ -1,36 +1,74 @@
 package com.tvaria.inventitask
 
-import org.assertj.core.api.Assertions.assertThat
+import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.getForEntity
-import org.springframework.http.HttpStatus
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.util.*
+import javax.persistence.EntityManager
 
+@AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Transactional
 class IntegrationTests(@Autowired val restTemplate: TestRestTemplate) {
 
+    @Autowired
+    lateinit var mockMvc: org.springframework.test.web.servlet.MockMvc
+
+    @Autowired
+    lateinit var entityManager: EntityManager
+
     @Test
-    fun `Assert that Swagger UI is accessible`() {
-        println(">> Assert that Swagger UI is accessible")
-        val entity = restTemplate.getForEntity<String>("/v1/swagger-ui.html")
-        assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(entity.body).contains("OpenAPI definition", "task-controller")
+    fun `Assert that OpenAPI Schema is accessible`() {
+        mockMvc.perform(get("/api-docs.json"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("\"title\":\"OpenAPI definition\"")))
     }
 
     @Test
-    fun `Assert that OpenApi Schema is accessible`() {
-        println(">> Assert that OpenApi Schema is accessible")
-        val entity = restTemplate.getForEntity<String>("/v1/openapi.json")
-        assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(entity.body).contains("\"info\":{\"title\":\"OpenAPI definition\",\"version\":\"v0\"}")
+    fun `Assert that Account balances calculated correctly`() {
+        mockMvc.perform(get("/balance").param("accountNumber", "01"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("\"EUR\":-0.5")))
     }
 
-//    @Test
-//    fun `Assert that Account balances calculated correctly`() {
-//        val entity = restTemplate.getForEntity<String>("/v1/balance?accountNumber=01")
-//        assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
-//        assertThat(entity.body).contains("\"EUR\": 0.5")
-//    }
+    @BeforeEach
+    fun setup() {
+        val transactions = listOf(
+            BankTransaction(
+                "01",
+                LocalDate.parse("2001-01-01"),
+                "02",
+                ".",
+                "2.5".toBigDecimal(),
+                Currency.getInstance("EUR")
+            ),
+            BankTransaction(
+                "02",
+                LocalDate.parse("2002-01-01"),
+                "01",
+                "..",
+                "2.0".toBigDecimal(),
+                Currency.getInstance("EUR")
+            ),
+            BankTransaction(
+                "03",
+                LocalDate.parse("2003-01-01"),
+                "02",
+                "...",
+                "10".toBigDecimal(),
+                Currency.getInstance("USD")
+            ),
+        )
+
+        transactions.forEach { entityManager.persist(it); entityManager.flush() }
+    }
 }
