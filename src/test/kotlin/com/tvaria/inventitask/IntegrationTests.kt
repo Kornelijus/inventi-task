@@ -1,16 +1,22 @@
 package com.tvaria.inventitask
 
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.util.*
 import javax.persistence.EntityManager
@@ -26,6 +32,9 @@ class IntegrationTests(@Autowired val restTemplate: TestRestTemplate) {
     @Autowired
     lateinit var entityManager: EntityManager
 
+    @Autowired
+    lateinit var webApplicationContext: WebApplicationContext
+
     @Test
     fun `Assert that OpenAPI Schema is accessible`() {
         mockMvc.perform(get("/api-docs.json"))
@@ -38,6 +47,42 @@ class IntegrationTests(@Autowired val restTemplate: TestRestTemplate) {
         mockMvc.perform(get("/balance").param("accountNumber", "01"))
             .andExpect(status().isOk)
             .andExpect(content().string(containsString("\"EUR\":-0.5")))
+    }
+
+    @Test
+    fun `Assert that CSV with invalid date not imported`() {
+        val exampleCsv = "account,date,beneficiary,comment,amount,currency\nA,2000-00-00,B,,2,USD"
+        val file = MockMultipartFile("csvFile", "example.csv", "text/csv", exampleCsv.toByteArray())
+        mockMvc.perform(multipart("/import", "csvFile").file(file))
+            .andExpect(status().isBadRequest)
+            .andExpect { r ->
+                assertTrue(r.resolvedException is ResponseStatusException)
+                assertEquals("400 BAD_REQUEST \"Invalid date format: use yyyy-MM-dd\"", r.resolvedException!!.message)
+            }
+    }
+
+    @Test
+    fun `Assert that CSV with invalid amount not imported`() {
+        val exampleCsv = "account,date,beneficiary,comment,amount,currency\nA,2000-01-01,B,,-2.2k,USD"
+        val file = MockMultipartFile("csvFile", "example.csv", "text/csv", exampleCsv.toByteArray())
+        mockMvc.perform(multipart("/import", "csvFile").file(file))
+            .andExpect(status().isBadRequest)
+            .andExpect { r ->
+                assertTrue(r.resolvedException is ResponseStatusException)
+                assertEquals("400 BAD_REQUEST \"Invalid amount\"", r.resolvedException!!.message)
+            }
+    }
+
+    @Test
+    fun `Assert that CSV with invalid currency not imported`() {
+        val exampleCsv = "account,date,beneficiary,comment,amount,currency\nA,2000-01-01,B,,2,ABC"
+        val file = MockMultipartFile("csvFile", "example.csv", "text/csv", exampleCsv.toByteArray())
+        mockMvc.perform(multipart("/import", "csvFile").file(file))
+            .andExpect(status().isBadRequest)
+            .andExpect { r ->
+                assertTrue(r.resolvedException is ResponseStatusException)
+                assertEquals("400 BAD_REQUEST \"Invalid currency: use ISO 4217 code\"", r.resolvedException!!.message)
+            }
     }
 
     @BeforeEach
