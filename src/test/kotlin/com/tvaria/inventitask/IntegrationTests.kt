@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multi
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.util.*
@@ -31,9 +30,6 @@ class IntegrationTests(@Autowired val restTemplate: TestRestTemplate) {
 
     @Autowired
     lateinit var entityManager: EntityManager
-
-    @Autowired
-    lateinit var webApplicationContext: WebApplicationContext
 
     @Test
     fun `Assert that OpenAPI Schema is accessible`() {
