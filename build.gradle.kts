@@ -15,7 +15,7 @@ allOpen {
 }
 
 group = "com.tvaria"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
