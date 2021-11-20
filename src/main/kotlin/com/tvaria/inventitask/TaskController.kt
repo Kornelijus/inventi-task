@@ -1,6 +1,7 @@
 package com.tvaria.inventitask
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestPart
@@ -16,9 +17,9 @@ class TaskController(@Autowired val statementService: StatementService) {
     // Specifying multipart/form-data as the content type fixes the issue of Swagger showing @RequestPart only as json,
     // not sure if there's a better way to solve this or if it's just a bug with springdoc-openapi
     @PostMapping("/import", consumes = ["multipart/form-data"])
-    fun importCSV(@RequestPart csvFile: MultipartFile) {
+    fun importCSV(@RequestPart csvFile: MultipartFile): ResponseEntity<String> {
         statementService.importStatement(csvFile.inputStream)
-        // TODO: return a meaningful response
+        return ResponseEntity.ok("CSV File ${csvFile.originalFilename ?: ""} imported successfully")
     }
 
     @GetMapping("/export", produces = ["text/csv"])
