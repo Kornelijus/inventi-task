@@ -11,7 +11,7 @@ import java.util.*
 import javax.servlet.http.HttpServletResponse
 
 @RestController
-class TaskController(@Autowired val accountService: AccountService, @Autowired val statementService: StatementService) {
+class TaskController(@Autowired val statementService: StatementService) {
 
     // Specifying multipart/form-data as the content type fixes the issue of Swagger showing @RequestPart only as json,
     // not sure if there's a better way to solve this or if it's just a bug with springdoc-openapi
@@ -28,6 +28,6 @@ class TaskController(@Autowired val accountService: AccountService, @Autowired v
 
     @GetMapping("/balance")
     fun calculateBalance(accountNumber: String, from: String?, to: String?): HashMap<Currency, BigDecimal> {
-        return accountService.getAccountBalance(accountNumber, from, to)
+        return statementService.getAccountBalance(accountNumber, from, to)
     }
 }
