@@ -2,6 +2,8 @@
 
 Take-Home Coding Challenge from Inventi
 
+**Making some improvements, for review you can see the initial version at [`v0.1.0`](https://github.com/Kornelijus/inventi-task/tree/v0.1.0)**
+
 ## Usage
 
 ```sh
