@@ -35,8 +35,8 @@ class StatementServiceImpl(@Autowired val transactionRepository: TransactionRepo
 
         return when {
             fromDate != null && toDate != null -> transactionRepository.findByDateBetween(fromDate, toDate)
-            fromDate != null -> transactionRepository.findByDateBefore(fromDate)
-            toDate != null -> transactionRepository.findByDateAfter(toDate)
+            fromDate != null -> transactionRepository.findByDateAfter(fromDate)
+            toDate != null -> transactionRepository.findByDateBefore(toDate)
             else -> transactionRepository.findAll()
         }
     }
