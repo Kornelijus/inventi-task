@@ -81,6 +81,61 @@ class IntegrationTests(@Autowired val restTemplate: TestRestTemplate) {
             }
     }
 
+    @Test
+    fun `Assert that CSV exported correctly`() {
+        val exampleCsv =
+            "account,date,beneficiary,comment,amount,currency\r\n" +
+                    "01,2001-01-01,02,.,2.5,EUR\r\n" +
+                    "02,2002-01-01,01,..,2.0,EUR\r\n" +
+                    "03,2003-01-01,02,...,10,USD\r\n"
+
+        mockMvc.perform(get("/export"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(exampleCsv))
+    }
+
+    @Test
+    fun `Assert that CSV exported correctly with date from`() {
+        val exampleCsv =
+            "account,date,beneficiary,comment,amount,currency\r\n" +
+                    "02,2002-01-01,01,..,2.0,EUR\r\n" +
+                    "03,2003-01-01,02,...,10,USD\r\n"
+
+        mockMvc.perform(get("/export").param("from", "2001-01-02"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(exampleCsv))
+    }
+
+    @Test
+    fun `Assert that CSV exported correctly with date to`() {
+        val exampleCsv =
+            "account,date,beneficiary,comment,amount,currency\r\n" +
+                    "01,2001-01-01,02,.,2.5,EUR\r\n"
+
+        mockMvc.perform(get("/export").param("to", "2001-01-02"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(exampleCsv))
+    }
+
+    @Test
+    fun `Assert that CSV exported correctly with date between`() {
+        val exampleCsv =
+            "account,date,beneficiary,comment,amount,currency\r\n" +
+                    "02,2002-01-01,01,..,2.0,EUR\r\n"
+
+        mockMvc.perform(get("/export").param("from", "2001-01-02").param("to", "2002-01-02"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(exampleCsv))
+    }
+
+    @Test
+    fun `Assert that balance calculated correctly`() {
+        mockMvc.perform(get("/balance").param("accountNumber", "02"))
+            .andExpect(status().isOk)
+            .andExpect(content().string(containsString("\"EUR\":0.5")))
+            .andExpect(content().string(containsString("\"USD\":10")))
+    }
+
     @BeforeEach
     fun setup() {
         val transactions = listOf(
