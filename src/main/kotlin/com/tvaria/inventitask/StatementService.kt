@@ -81,6 +81,10 @@ class StatementServiceImpl(@Autowired val transactionRepository: TransactionRepo
     }
 
     override fun exportStatement(response: HttpServletResponse, from: String?, to: String?) {
+
+        response.contentType = "text/csv"
+        response.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"")
+
         val transactions = getStatement(from, to)
         csvWriter().open(response.outputStream) {
             writeRow("account", "date", "beneficiary", "comment", "amount", "currency")
@@ -103,11 +107,11 @@ class StatementServiceImpl(@Autowired val transactionRepository: TransactionRepo
 
         when {
             transactions.isEmpty() && (from != null || to != null) -> throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "No transactions with account found in provided timeframe"
             )
             transactions.isEmpty() -> throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "No transactions with account found"
             )
             else -> transactions.forEach {
